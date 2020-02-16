@@ -6,3 +6,43 @@
 2020-02-15 03:42:15,164 - INFO - Id: ac28542875 levou 7.391463 segundos ou 7391 milissegundos para ser processado.
 2020-02-15 03:42:53,907 - INFO - Id: ac28542875 url: https://www.icarros.com.br/comprar/sao-paulo-sp/chevrolet/onix/2019/d28510029
 2020-02-15 03:43:03,907 - INFO - Id: ac28542875 levou 7.886819 segundos ou 7886 milissegundos para ser processado.
+2020-02-15 15:43:27,600 - INFO - Id: ac28542875 url: https://www.icarros.com.br/comprar/sao-paulo-sp/chevrolet/onix/2019/d28510029
+2020-02-15 15:45:07,907 - ERROR - Ocorreu um erro ao processar o Id: ac28542875
+2020-02-15 15:45:07,907 - ERROR - Message: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=80.0.3987.100)
+Traceback (most recent call last):
+  File "d:/Users/John.Medeiros/git/pgetpricarros/detail.py", line 101, in obter_detalhe_anuncio
+    #driver = webdriver.Firefox(executable_path=r"C:/Users/F0127173/git/pric-mego/vendor/geckodriver-v0.26.0-win64/geckodriver.exe")
+  File "C:\Python\3.7\lib\site-packages\selenium\webdriver\remote\webdriver.py", line 394, in find_element_by_xpath
+    return self.find_element(by=By.XPATH, value=xpath)
+  File "C:\Python\3.7\lib\site-packages\selenium\webdriver\remote\webdriver.py", line 978, in find_element
+    'value': value})['value']
+  File "C:\Python\3.7\lib\site-packages\selenium\webdriver\remote\webdriver.py", line 321, in execute
+    self.error_handler.check_response(response)
+  File "C:\Python\3.7\lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 242, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed
+from unknown error: web view not found
+  (Session info: chrome=80.0.3987.100)
+
+2020-02-15 15:45:10,006 - INFO - None
+2020-02-15 15:47:02,339 - INFO - Id: ac28542875 url: https://www.icarros.com.br/comprar/sao-paulo-sp/chevrolet/onix/2019/d28510029
+2020-02-15 15:47:36,077 - INFO - Id: ac28542875 levou 31.633537 segundos ou 31633 milissegundos para ser processado.
+2020-02-15 15:50:32,183 - INFO - Id: ac28542875 url: https://www.icarros.com.br/comprar/sao-paulo-sp/chevrolet/onix/2019/d28510029
+2020-02-15 15:50:44,807 - INFO - Id: ac28542875 levou 10.3314 segundos ou 10331 milissegundos para ser processado.
+2020-02-15 15:51:12,397 - INFO - Id: ac28542875 url: https://www.icarros.com.br/comprar/sao-paulo-sp/chevrolet/onix/2019/d28510029
+2020-02-15 15:51:25,708 - INFO - Id: ac28542875 levou 11.218194 segundos ou 11218 milissegundos para ser processado.
+2020-02-15 15:51:52,357 - INFO - PID:20164
+2020-02-15 15:51:52,357 - INFO - Id: ac28542875 url: https://www.icarros.com.br/comprar/sao-paulo-sp/chevrolet/onix/2019/d28510029
+2020-02-15 15:52:02,236 - INFO - Id: ac28542875 levou 7.778238 segundos ou 7778 milissegundos para ser processado.
+2020-02-15 15:55:00,280 - INFO - PID: 5700
+2020-02-15 15:55:00,280 - INFO - Id: ac28542875 url: https://www.icarros.com.br/comprar/sao-paulo-sp/chevrolet/onix/2019/d28510029
+2020-02-15 15:55:13,540 - INFO - Id: ac28542875 levou 11.156751 segundos ou 11156 milissegundos para ser processado.
+2020-02-15 15:55:13,540 - ERROR - Erro ao salvar o arquivo: d:/teste.csv
+2020-02-15 15:55:13,540 - ERROR - [Errno 13] Permission denied: 'd:/teste.csv'
+Traceback (most recent call last):
+  File "d:/Users/John.Medeiros/git/pgetpricarros/detail.py", line 171, in Salva_CSV
+    with open(filename, 'a', newline='\n', encoding='utf8') as f:
+PermissionError: [Errno 13] Permission denied: 'd:/teste.csv'
+2020-02-15 15:55:13,541 - INFO - Processamento finalizado.
