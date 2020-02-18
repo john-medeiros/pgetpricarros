@@ -175,6 +175,7 @@ def main():
         logging.info('url inicial: ' + str(url_busca))
 
         opts = Options()
+        opts.headless = True
         #opts.headless = True
         driver = webdriver.Firefox(executable_path=r"C:/Users/F0127173/git/pric-mego/vendor/geckodriver-v0.26.0-win64/geckodriver.exe", options=opts)
 

@@ -1,0 +1,8 @@
+2020-02-18 12:29:50,319 - INFO - PID: 78800
+2020-02-18 12:29:50,319 - INFO - url inicial: https://www.icarros.com.br/ache/listaanuncios.jsp?bid=0&opcaocidade=1&foa=1&anunciosUsados=1&marca1=15&modelo1=287&anomodeloinicial=2016&anomodelofinal=2021&precominimo=0&precomaximo=0&cidadeaberto=&escopo=2&locationSop=est_SP.1_-cid_9668.1_-esc_2.1_-rai_50.1_
+2020-02-18 12:30:00,838 - INFO - Atual url: https://www.icarros.com.br/ache/listaanuncios.jsp?bid=0&opcaocidade=1&foa=1&anunciosUsados=1&marca1=15&modelo1=287&anomodeloinicial=2016&anomodelofinal=2021&precominimo=0&precomaximo=0&cidadeaberto=&escopo=2&locationSop=est_SP.1_-cid_9668.1_-esc_2.1_-rai_50.1_
+2020-02-18 12:30:31,505 - ERROR - Erro de timeout ao obter a página atual.
+2020-02-18 12:30:31,506 - INFO - Quantidade de anúncios obtidos: 0
+2020-02-18 12:31:01,929 - ERROR - Erro de timeout ao obter a próxima página.
+2020-02-18 12:31:01,929 - INFO - Todas as páginas foram processadas para esta busca.
+2020-02-18 12:31:01,929 - INFO - Processamento finalizado.
