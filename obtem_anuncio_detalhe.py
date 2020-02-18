@@ -7,6 +7,11 @@ import logging.handlers
 import datetime
 import os.path
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+import signal
+from selenium.common.exceptions import TimeoutException
 
 MIN_PYTHON = (3, 7)
 
@@ -14,14 +19,86 @@ if sys.version_info < MIN_PYTHON:
     sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
 def init():
+    logFileName='./'+os.path.basename(__file__).replace('.py', '.log')
     logger = logging.getLogger()
-    fh = logging.handlers.RotatingFileHandler('./app.log', maxBytes=10240, backupCount=5, encoding='utf-8')
+    #fh = logging.handlers.RotatingFileHandler('./app.log', maxBytes=102400, backupCount=5, encoding='utf-8')
+    fh = logging.handlers.RotatingFileHandler(logFileName, encoding='utf-8')
     fh.setLevel(logging.DEBUG)#no matter what level I set here
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     logger.setLevel(logging.INFO)
     logger.addHandler(fh)
     logging.info('PID: ' + str(os.getpid()))
+
+class AnuncioResumido:
+
+    def __init__(self,id=None,url=None,pagina=None):
+        self.__pagina = str(pagina)
+        self.__id = str(id)
+        self.__url = str(url)    
+        self.__data_inicio =  datetime.datetime.now()
+        self.__data_fim = None         
+
+    @property
+    def id(self):
+        return self.__id
+
+    @id.setter
+    def id(self, value):
+        self.__id = str(value)
+
+    @property
+    def url(self):
+        return self.__url
+
+    @url.setter
+    def url(self, value):
+        self.__url = str(value)     
+
+    @property
+    def data_inicio(self):
+        return self.__data_inicio
+
+    @data_inicio.setter
+    def data_inicio(self, value):
+        self.__data_inicio = value
+
+    @property
+    def data_fim(self):
+        return self.__data_fim
+
+    @data_fim.setter
+    def data_fim(self, value):
+        self.__data_fim = value
+
+    @property
+    def pagina(self):
+        return self.__pagina
+
+    @pagina.setter
+    def pagina(self, value):
+        self.__pagina = value        
+
+    def Salva_CSV(self,filename):
+        try:
+            if not os.path.isfile(filename):
+                AnuncioResumido.Cria_Arquivo(filename)
+
+            with open(filename, 'a', newline='\n', encoding='utf8') as f:
+                writer = csv.writer(f,delimiter=';')
+                writer.writerow([self.data_inicio, self.data_fim, self.pagina, self.id, self.url])      
+            f.close()
+        except Exception as e:
+            logging.error('Erro ao salvar o arquivo: ' + filename)
+            logging.exception(e)
+            raise e          
+
+    @staticmethod
+    def Cria_Arquivo(filename):
+            with open(filename, 'w', newline='\n', encoding='utf8') as f:
+                writer = csv.writer(f)
+                writer.writerow(['data_inicio; data_fim; pagina; id; url'])
+            f.close()
 
 class Anuncio:
     
@@ -39,6 +116,7 @@ class Anuncio:
         self.__info_veiculo = str(info_veiculo)
         self.__data_inicio =  datetime.datetime.now()
         self.__data_fim = None
+        self.__valido = False
     
     @property
     def id(self):
@@ -118,7 +196,7 @@ class Anuncio:
 
     @acessorio.setter
     def acessorio(self, value):
-        self.__acessorio = str(value) 
+        self.__acessorio = str(value).replace(';','|||')
 
     @property
     def info_veiculo(self):
@@ -126,7 +204,7 @@ class Anuncio:
 
     @info_veiculo.setter
     def info_veiculo(self, value):
-        self.__info_veiculo = str(value)
+        self.__info_veiculo = str(value).replace(';','|||')
 
     @property
     def data_inicio(self):
@@ -143,6 +221,14 @@ class Anuncio:
     @data_fim.setter
     def data_fim(self, value):
         self.__data_fim = value
+
+    @property
+    def valido(self):
+        return self.__valido
+
+    @valido.setter
+    def valido(self, value):
+        self.__valido = value        
 
     def valida_conteudo_obtido(self):
         if self.titulo is None:
@@ -162,7 +248,12 @@ class Anuncio:
         if self.acessorio is None:
             logging.warning('Acessorio do id: ' + str(self.acessorio) + ' está vazio.')                                                                        
         if self.info_veiculo is None:
-            logging.warning('Informações de veículo do id: ' + str(self.info_veiculo) + ' está vazio.')        
+            logging.warning('Informações de veículo do id: ' + str(self.info_veiculo) + ' está vazio.')   
+
+        if ((self.titulo is None) or (self.preco is None) or (self.ano is None) or (self.km is None)):
+            self.valido=False
+        else:
+            self.valido=True
 
     def Salva_CSV(self,filename):
         try:
@@ -192,23 +283,26 @@ class Anuncio:
                 writer.writerow(['data_inicio; data_fim; id; titulo; preco; ano; km; cor; cambio; portas; url; acessorio; info_veiculo'])
             f.close()
 
-def obter_detalhe_anuncio(id,url):
+def obter_detalhe_anuncio(id,url,p):
     try:
         anuncio = Anuncio(id,url)
         logging.info('Id: ' + id + ' url: ' + url)
-        opts = Options()
-        opts.headless = True
-        driver = webdriver.Firefox(executable_path=r"C:/Users/F0127173/git/pric-mego/vendor/geckodriver-v0.26.0-win64/geckodriver.exe", options=opts)
-        #driver = webdriver.Chrome(executable_path="D:/Users/John.Medeiros/Downloads/chromedriver_win32/chromedriver.exe")
-        driver.get(url)
-        titulo = driver.find_element_by_xpath('//*[@id="ctdoTopo"]/h1')
+        p.get(url)
+
+        titulo = WebDriverWait(p, 30).until(EC.presence_of_element_located((By.XPATH, '//*[@id="ctdoTopo"]/h1')))
+        #titulo = p.find_element_by_xpath('//*[@id="ctdoTopo"]/h1')
         if titulo is not None:
             anuncio.titulo=titulo.text  
-        preco = driver.find_element_by_xpath('//*[@id="cardProposta"]/div/h2')
+        preco = p.find_element_by_xpath('//*[@id="cardProposta"]/div/h2')
         if preco is not None:
             anuncio.preco=preco.text
 
-        element = driver.find_element_by_xpath('/html/body/div/div[1]/div/div[5]/div[1]/div[2]/div')
+        if (leitura_bloqueada(p)):
+            logging.info('Leitura bloqueada pelo site.')
+            anuncio.valido = False
+            return anuncio
+
+        element = p.find_element_by_xpath('/html/body/div/div[1]/div/div[5]/div[1]/div[2]/div')
         html = element.get_attribute('innerHTML')
         sub_html = BeautifulSoup(html,'html.parser') 
         ul = sub_html.find('ul')
@@ -232,7 +326,7 @@ def obter_detalhe_anuncio(id,url):
                 anuncio.portas = i.find('span').text
                 continue     
 
-        element = driver.find_element_by_xpath('/html/body/div/div[2]/div/div/div/div[1]')    
+        element = p.find_element_by_xpath('/html/body/div/div[2]/div/div/div/div[1]')    
         html = element.get_attribute('innerHTML') 
         sub_html = BeautifulSoup(html,'html.parser')   
         ul = sub_html.find('ul')
@@ -274,33 +368,50 @@ def obter_detalhe_anuncio(id,url):
 
         anuncio.data_fim=datetime.datetime.now()
 
-    except Exception as e:
-        print(e)
-        logging.error('Ocorreu um erro ao processar o Id: ' + id)
-        logging.exception(e)
-        raise
-    finally:
-        if driver is not None:
-            driver.quit()
-        logging.info(anuncio.Obtem_Tempo_Processamento())
-        return anuncio
-
-def main():
-    try:
-        init()
-        with open ('d:/anuncio_resumido.txt') as csvFile:
-            reader = csv.reader(csvFile, delimiter=';')
-            next(reader,None)
-            for row in reader:
-                anuncio_retornado = obter_detalhe_anuncio(row[3],row[4])
-                anuncio_retornado.valida_conteudo_obtido()
-                anuncio_retornado.Salva_CSV("d:/teste.txt")
+    except TimeoutException as e:
+        logging.error('Erro de timeout ao obter dados do anúncio: ' + str(id) + ' com a url: ' + str(url))
+        anuncio.valido = False
+        #logging.exception(e)
     except Exception as e:
         #print(e)
         logging.error('Ocorreu um erro ao processar o Id: ' + id)
         logging.exception(e)
         raise
     finally:
+        #logging.info(anuncio.Obtem_Tempo_Processamento())
+        return anuncio
+
+def leitura_bloqueada(d):
+    element = d.find_element_by_xpath('/html/body')
+    if (element.text.strip() == "401 Unauthorized! You aren't authorized to get this content."):
+        return True
+    else:
+        return False
+
+def main():
+    try:
+        init()
+        opts = Options()
+        #opts.headless = True
+        driver = webdriver.Firefox(executable_path=r"C:/Users/F0127173/git/pric-mego/vendor/geckodriver-v0.26.0-win64/geckodriver.exe", options=opts)
+        with open ('d:/anuncio_resumido_ford_ka.txt') as csvFile:
+            reader = csv.reader(csvFile, delimiter=';')
+            next(reader,None)
+            for row in reader:
+                anuncio_retornado = obter_detalhe_anuncio(row[3],row[4],driver)
+                anuncio_retornado.valida_conteudo_obtido()
+                print('')
+                if anuncio_retornado.valido == True:
+                    anuncio_retornado.Salva_CSV("d:/teste_ford_ka.txt")
+                else:
+                    logging.warning('Anúncio inacessível. id: ' + str(row[3]) + ' com a url: ' + str(row[4]))
+    except Exception as e:
+        logging.error('Ocorreu um erro ao processar o Id: ' + str(id))
+        logging.exception(e)
+        raise e
+    finally:
+        if driver is not None:
+            driver.quit()
         logging.info('Processamento finalizado.')
 
 if __name__ == '__main__':
